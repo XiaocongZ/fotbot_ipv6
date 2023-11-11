@@ -506,7 +506,7 @@ int fbQUIT(char *params) {
 
 int main(int argc , char *argv[]) {
   int socket_desc, addrlen, read_size;
-  struct sockaddr_in server, client;
+  struct sockaddr_in6 server, client;
   char rcvbuf[CLIENT_REQUEST_MAX_SIZE];
   int exit_code = 0;
 
@@ -530,7 +530,7 @@ int main(int argc , char *argv[]) {
   kh_value(users, ki) = admin;
 
   //Create a TCP socket
-  socket_desc = socket(AF_INET , SOCK_STREAM , 0);
+  socket_desc = socket(AF_INET6 , SOCK_STREAM , IPPROTO_TCP);
   if (socket_desc == -1) {
     fprintf(stderr, "[ERROR] FotBot: cannot create a socket\n");
     exit_code = 1;
@@ -546,9 +546,9 @@ int main(int argc , char *argv[]) {
   }
 
   //Prepare a sockaddr_in structure for the server
-  server.sin_family = AF_INET;
-  server.sin_addr.s_addr = inet_addr(argv[1]);
-  server.sin_port = htons(atoi(argv[2]));
+  server.sin6_family = AF_INET6;
+  server.sin6_addr = in6addr_any;
+  server.sin6_port = htons(atoi(argv[2]));
 
   //Bind a socket to the server
   if(bind(socket_desc, (struct sockaddr *)&server, sizeof(server)) < 0) {
@@ -562,7 +562,7 @@ int main(int argc , char *argv[]) {
 
   //For simplicity, this server accepts only one connection
   listen(socket_desc, 1);
-  addrlen = sizeof(struct sockaddr_in);
+  addrlen = sizeof(client);
 
   client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&addrlen);
   if (client_sock < 0) {
