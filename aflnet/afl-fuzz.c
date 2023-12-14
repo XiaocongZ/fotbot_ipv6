@@ -986,8 +986,8 @@ int send_over_network()
 {
   int n;
   u8 likely_buggy = 0;
-  struct sockaddr_in serv_addr;
-  struct sockaddr_in local_serv_addr;
+  struct sockaddr_in6 serv_addr;
+  struct sockaddr_in6 local_serv_addr;
 
   //Clean up the server if needed
   if (cleanup_script) system(cleanup_script);
@@ -1010,9 +1010,9 @@ int send_over_network()
   //Create a TCP/UDP socket
   int sockfd = -1;
   if (net_protocol == PRO_TCP)
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    sockfd = socket(AF_INET6, SOCK_STREAM, 0);
   else if (net_protocol == PRO_UDP)
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    sockfd = socket(AF_INET6, SOCK_DGRAM, 0);
 
   if (sockfd < 0) {
     PFATAL("Cannot create a socket");
@@ -1027,20 +1027,22 @@ int send_over_network()
 
   memset(&serv_addr, '0', sizeof(serv_addr));
 
-  serv_addr.sin_family = AF_INET;
-  serv_addr.sin_port = htons(net_port);
-  serv_addr.sin_addr.s_addr = inet_addr(net_ip);
+  serv_addr.sin6_family = AF_INET6;
+  serv_addr.sin6_port = htons(net_port);
+  inet_pton(AF_INET6, "net_ip", &serv_addr.sin6_addr);
+  //serv_addr.sin6_addr.s_addr = inet_addr(net_ip); //Todo
 
   //This piece of code is only used for targets that send responses to a specific port number
-  //The Kamailio SIP server is an example. After running this code, the intialized sockfd 
+  //The Kamailio SIP server is an example. After running this code, the intialized sockfd
   //will be bound to the given local port
   if(local_port > 0) {
-    local_serv_addr.sin_family = AF_INET;
-    local_serv_addr.sin_addr.s_addr = INADDR_ANY;
-    local_serv_addr.sin_port = htons(local_port);
+    local_serv_addr.sin6_family = AF_INET6;
+    serv_addr.sin6_addr = in6addr_any;
+    //local_serv_addr.sin6_addr.s_addr = in6addr_any;
+    local_serv_addr.sin6_port = htons(local_port);
 
-    local_serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    if (bind(sockfd, (struct sockaddr*) &local_serv_addr, sizeof(struct sockaddr_in)))  {
+    //local_serv_addr.sin6_addr = inet_addr("::1");
+    if (bind(sockfd, (struct sockaddr*) &local_serv_addr, sizeof(struct sockaddr_in6)))  {
       FATAL("Unable to bind socket on local source port");
     }
   }
@@ -8937,7 +8939,7 @@ int main(int argc, char** argv) {
       case 'N': /* Network configuration */
         if (use_net) FATAL("Multiple -N options not supported");
         if (parse_net_config(optarg, &net_protocol, &net_ip, &net_port)) FATAL("Bad syntax used for -N. Check the network setting. [tcp/udp]://127.0.0.1/port");
-
+        //Todo
         use_net = 1;
         break;
 

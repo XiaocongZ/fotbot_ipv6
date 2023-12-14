@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:22.04
 
 # Install common dependencies
 RUN apt-get -y update && \
@@ -6,11 +6,11 @@ RUN apt-get -y update && \
     apt-utils \
     build-essential \
     openssl \
-    clang \
+    clang-12 \
     graphviz-dev \
     git \
     libgnutls28-dev \
-    python-pip \
+    python3-pip \
     nano \
     net-tools \
     vim \
@@ -33,7 +33,7 @@ USER ubuntu
 WORKDIR /home/ubuntu
 
 # Install gcovr for collecting code coverage information
-RUN pip install gcovr
+RUN pip3 install gcovr
 
 # Set up environment variables
 ENV WORKDIR="/home/ubuntu"
@@ -57,6 +57,7 @@ COPY --chown=ubuntu:ubuntu marking $WORKDIR/marking
 # Compile AFLNet
 RUN cd $WORKDIR && \
     cd aflnet && \
-    make clean all && \
-    cd llvm_mode && \
-    LLVM_CONFIG=llvm-config-6.0 make
+    make clean all
+RUN cd $WORKDIR/aflnet/llvm_mode && \
+    CC=/usr/bin/clang-12 CXX=/usr/bin/clang-12 \
+    LLVM_CONFIG=llvm-config-12 make

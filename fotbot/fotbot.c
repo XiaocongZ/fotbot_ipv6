@@ -9,7 +9,7 @@
  *    reasons; e.g.competitions to see who can take the most steps.
  *  - To share information with the FotBot company.
  *
- * Each FotBot's data is stored in the cloud. User data is accessible 
+ * Each FotBot's data is stored in the cloud. User data is accessible
  * the user themselves, their friends in the friend list or the admin account
  *
  * The server code is below. For simplicity for the assignment, the
@@ -506,7 +506,8 @@ int fbQUIT(char *params) {
 
 int main(int argc , char *argv[]) {
   int socket_desc, addrlen, read_size;
-  struct sockaddr_in6 server, client;
+  struct sockaddr_in6 server = {0};
+  struct sockaddr_in6 client = {0};
   char rcvbuf[CLIENT_REQUEST_MAX_SIZE];
   int exit_code = 0;
 
