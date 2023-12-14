@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 
 # Install common dependencies
 RUN apt-get -y update && \
-    apt-get -y install sudo \ 
+    apt-get -y install sudo \
     apt-utils \
     build-essential \
     openssl \
@@ -20,7 +20,9 @@ RUN apt-get -y update && \
     libtool \
     unzip \
     tcpdump \
-    telnet
+    telnet \
+    libxml2 \
+    libxslt1-dev
 
 # Add a new user ubuntu, pass: ubuntu
 RUN groupadd ubuntu && \
