@@ -71,6 +71,8 @@
 #include <graphviz/gvc.h>
 #include <math.h>
 
+#include <libgen.h>
+
 #if defined(__APPLE__) || defined(__FreeBSD__) || defined (__OpenBSD__)
 #  include <sys/sysctl.h>
 #endif /* __APPLE__ || __FreeBSD__ || __OpenBSD__ */
@@ -1025,11 +1027,11 @@ int send_over_network()
   timeout.tv_usec = socket_timeout_usecs;
   setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout));
 
-  memset(&serv_addr, '0', sizeof(serv_addr));
+  memset(&serv_addr, 0, sizeof(serv_addr));
 
   serv_addr.sin6_family = AF_INET6;
   serv_addr.sin6_port = htons(net_port);
-  inet_pton(AF_INET6, "net_ip", &serv_addr.sin6_addr);
+  inet_pton(AF_INET6, net_ip, &serv_addr.sin6_addr);
   //serv_addr.sin6_addr.s_addr = inet_addr(net_ip); //Todo
 
   //This piece of code is only used for targets that send responses to a specific port number
@@ -1037,11 +1039,10 @@ int send_over_network()
   //will be bound to the given local port
   if(local_port > 0) {
     local_serv_addr.sin6_family = AF_INET6;
-    serv_addr.sin6_addr = in6addr_any;
-    //local_serv_addr.sin6_addr.s_addr = in6addr_any;
+    local_serv_addr.sin6_addr = in6addr_any;
     local_serv_addr.sin6_port = htons(local_port);
 
-    //local_serv_addr.sin6_addr = inet_addr("::1");
+    inet_pton(AF_INET6, "::1", &local_serv_addr.sin6_addr);
     if (bind(sockfd, (struct sockaddr*) &local_serv_addr, sizeof(struct sockaddr_in6)))  {
       FATAL("Unable to bind socket on local source port");
     }
